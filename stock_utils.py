@@ -46,4 +46,64 @@ def get_sp500_tickers():
     return sorted(tickers)
 
 
+
+import time
+import yfinance as yf
+
+
+def build_company_info(tickers, pause=0.10):
+    """
+    Fetch basic company metadata for a list of stock tickers using yfinance.
+
+    For each ticker, this function retrieves the company's short name,
+    sector, and industry from Yahoo Finance and stores the results in a
+    dictionary keyed by ticker symbol.
+
+    A short delay is added between requests to reduce the likelihood of
+    rate limiting by Yahoo Finance.
+
+    Parameters
+    ----------
+    tickers : iterable of str
+        Stock ticker symbols (e.g., ["AAPL", "MSFT", "BRK-B"]).
+
+    pause : float, optional
+        Number of seconds to sleep between API calls (default is 0.10).
+
+    Returns
+    -------
+    dict
+        Dictionary mapping ticker symbols to company information.
+        Example:
+        {
+            "AAPL": {
+                "Name": "Apple Inc.",
+                "Sector": "Technology",
+                "Industry": "Consumer Electronics"
+            },
+            ...
+        }
+    """
+    company_info = {}
+
+    for ticker in tickers:
+        # Create a yfinance Ticker object
+        stock = yf.Ticker(ticker)
+
+        # Fetch metadata dictionary from Yahoo Finance
+        info = stock.info
+
+        # Safely extract relevant fields (may be missing or None)
+        company_info[ticker] = {
+            "Name": info.get("shortName"),
+            "Sector": info.get("sector"),
+            "Industry": info.get("industry"),
+        }
+
+        # Pause to avoid triggering rate limits
+        time.sleep(pause)
+
+    return company_info
+
+
     
